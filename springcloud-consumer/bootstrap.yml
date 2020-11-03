@@ -1,0 +1,78 @@
+server:
+  port: 8083
+
+#开启hystrixdashboard
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+feign:
+  hystrix:
+    enabled: true
+
+ribbon:
+  #OkToRetryOnAllOperations: false #对所有操作请求都进行重试,默认false
+  ReadTimeout: 10000   #负载均衡超时时间，默认值5000
+  ConnectTimeout: 10000 #ribbon请求连接的超时时间，默认值2000
+  MaxAutoRetries: 0     #对当前实例的重试次数，默认0
+  MaxAutoRetriesNextServer: 0 #对切换实例的重试次数，默认1
+
+#provder:
+#  ribbon:
+#    NFLoadBalancerRuleClassName: com.netflix.loadbalancer.RoundRobinRule
+
+hystrix:
+  command:
+    #ProviderHelloService#helloTimeOut(String):   #该方法超过0.5秒，断路器熔断触发回退的方法
+    #  execution:
+    #    timeout:
+    #      enabled: true
+    #    isolation:
+    #      thread:
+    #        timeoutInMilliseconds: 5000
+      #circuitBreaker: #10秒内请求数量超过3次满足熔断第一个条件，如果请求中50%的请求是失败的满足第二个条件
+      #  requestVolumeThreshold: 3
+    default:   #该方法超过0.5秒，断路器熔断触发回退的方法
+      fallback:
+        isolation:
+          semaphore:
+            maxConcurrentRequests: 50
+      execution:
+        timeout:
+          enabled: true
+        isolation:
+          semaphore:
+            maxConcurrentRequests: 5
+          thread:
+            timeoutInMilliseconds: 8000
+      circuitBreaker: #10秒内请求数量超过100次满足熔断第一个条件，如果请求中50%的请求是失败的满足第二个条件
+        requestVolumeThreshold: 200
+  threadpool:
+    #provider:
+    #  coreSize: 10 #并发执行的最大线程数，默认10
+    #  maximumSize: 10  #最大线程数
+    #  maxQueueSize: 1000 #BlockingQueue的最大队列数，默认值-1
+    #  queueSizeRejectionThreshold: 1000 #即使maxQueueSize没有达到，达到queueSizeRejectionThreshold该值后，请求也会被拒绝，默认值5
+    #官方默认队列阈值只有5个， 如果要调整队列，必须同时修改maxQueueSize和queueSizeRejectionThreshold属性的值，否则都会出现异常！
+    default:
+      coreSize: 5 #并发执行的最大线程数，默认10
+      #maximumSize: 5  #最大线程数
+      maxQueueSize: 7 #BlockingQueue的最大队列数，默认值-1
+      queueSizeRejectionThreshold: 6 #即使maxQueueSize没有达到，达到queueSizeRejectionThreshold该值后，请求也会被拒绝，默认值5
+
+spring:
+  application:
+    name: consumer   #注册到Eureka Server上的应用名称
+eureka:
+  instance:
+    #lease-renewal-interval-in-seconds 每间隔1s，向服务端发送一次心跳，证明自己依然"存活"
+    lease-renewal-interval-in-seconds: 1
+    #lease-expiration-duration-in-seconds  告诉服务端，如果我2s之内没有给你发心跳，就代表我"死"了，将我踢出掉。
+    lease-expiration-duration-in-seconds: 2
+    prefer-ip-address: true
+  client:
+    registryFetchIntervalSeconds: 5
+    service-url:
+      defaultZone: http://localhost:8081/eureka/
