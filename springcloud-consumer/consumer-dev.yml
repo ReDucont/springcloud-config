@@ -1,4 +1,4 @@
-test: 192
+test: 255
 
 server:
   port: 8083
