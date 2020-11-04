@@ -1,3 +1,6 @@
+server:
+  port: 8083
+
 #开启hystrixdashboard
 management:
   endpoints:
@@ -29,8 +32,8 @@ hystrix:
     #    isolation:
     #      thread:
     #        timeoutInMilliseconds: 5000
-      #circuitBreaker: #10秒内请求数量超过3次满足熔断第一个条件，如果请求中50%的请求是失败的满足第二个条件
-      #  requestVolumeThreshold: 3
+    #circuitBreaker: #10秒内请求数量超过3次满足熔断第一个条件，如果请求中50%的请求是失败的满足第二个条件
+    #  requestVolumeThreshold: 3
     default:   #该方法超过0.5秒，断路器熔断触发回退的方法
       fallback:
         isolation:
@@ -59,6 +62,9 @@ hystrix:
       maxQueueSize: 7 #BlockingQueue的最大队列数，默认值-1
       queueSizeRejectionThreshold: 6 #即使maxQueueSize没有达到，达到queueSizeRejectionThreshold该值后，请求也会被拒绝，默认值5
 
+spring:
+  application:
+    name: consumer   #注册到Eureka Server上的应用名称
 eureka:
   instance:
     #lease-renewal-interval-in-seconds 每间隔1s，向服务端发送一次心跳，证明自己依然"存活"
